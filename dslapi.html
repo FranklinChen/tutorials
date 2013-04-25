@@ -168,6 +168,70 @@ the second stage, driven by the type of their condition.</p>
 </div>
 <p>With this fine-grain control, conditional loop unrolling can be
 implemented at the DSL user level.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">unrollIf</span><span class="o">(</span><span class="n">range</span><span class="k">:</span> <span class="kt">Range</span><span class="o">)(</span><span class="n">cond</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span> <span class="k">=</span> <span class="k">new</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">foreach</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Rep</span><span class="o">[</span><span class="kt">Unit</span><span class="o">])</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">cond</span><span class="o">)</span> <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="n">range</span><span class="o">)</span> <span class="n">f</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+    <span class="k">else</span> <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">range</span><span class="o">.</span><span class="n">start</span> <span class="n">until</span> <span class="n">range</span><span class="o">.</span><span class="n">end</span><span class="o">)</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Range</span><span class="o">])</span> <span class="n">f</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>We can use this conditional loop unrolling to optimize multiplying a
+matrix known at staging time with a vector. For example, consider a
+matrix with one dense rows, and otherwise sparse rows:</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="n">A</span><span class="o">(</span><span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">),</span> <span class="c1">// dense</span>
+  <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// null</span>
+  <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// sparse</span>
+  <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span>
+  <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+</pre></div>
+</div>
+<p>When scanning the columns, we would like to generate a loop for the
+dense row, and unroll the loop for the sparse rows.</p>
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]],</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">n</span> <span class="k">=</span> <span class="n">a</span><span class="o">.</span><span class="n">length</span>
+  <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="nc">NewArray</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="n">n</span><span class="o">)</span>
+  <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="k">:</span> <span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">comment</span><span class="o">(</span><span class="s">&quot;index_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="n">unrollIf</span><span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)(</span><span class="n">sparse</span><span class="o">(</span><span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">))))</span> <span class="o">{</span>
+        <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">at</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+  <span class="n">v1</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Let's compare the code generated for a dense vs sparse row.</p>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<span class="k">var</span> <span class="n">x3</span> <span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">val</span> <span class="n">x12</span> <span class="k">=</span> <span class="k">while</span> <span class="o">(</span><span class="n">x3</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">)</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x4</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x6</span> <span class="k">=</span> <span class="n">x5</span><span class="o">(</span><span class="n">x3</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x7</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="n">x3</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x8</span> <span class="k">=</span> <span class="n">x6</span> <span class="o">*</span> <span class="n">x7</span>
+<span class="k">val</span> <span class="n">x9</span> <span class="k">=</span> <span class="n">x4</span> <span class="o">+</span> <span class="n">x8</span>
+<span class="k">val</span> <span class="n">x10</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="n">x9</span>
+<span class="n">x10</span>
+<span class="n">x3</span> <span class="k">=</span> <span class="n">x3</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">}</span>
+<span class="n">x12</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<span class="k">val</span> <span class="n">x25</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x27</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x25</span>
+<span class="k">val</span> <span class="n">x28</span> <span class="k">=</span> <span class="n">x25</span> <span class="o">+</span> <span class="n">x20</span>
+<span class="k">val</span> <span class="n">x29</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x28</span>
+<span class="o">()</span>
+</pre></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
