@@ -54,7 +54,10 @@
 <p class="topic-title first">Contents</p>
 <ul class="simple">
 <li><a class="reference internal" href="#dsl-api" id="id1">DSL API</a><ul>
-<li><a class="reference internal" href="#staging" id="id2">Staging</a></li>
+<li><a class="reference internal" href="#concepts" id="id2">Concepts</a><ul>
+<li><a class="reference internal" href="#staging" id="id3">Staging</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -62,14 +65,18 @@
 <div class="section" id="dsl-api">
 <h1><a class="toc-backref" href="#id1">DSL API</a><a class="headerlink" href="#dsl-api" title="Permalink to this headline">¶</a></h1>
 <p>We introduce the concepts common to all DSLs built with LMS.</p>
+<div class="section" id="concepts">
+<h2><a class="toc-backref" href="#id2">Concepts</a><a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="staging">
-<h2><a class="toc-backref" href="#id2">Staging</a><a class="headerlink" href="#staging" title="Permalink to this headline">¶</a></h2>
+<h3><a class="toc-backref" href="#id3">Staging</a><a class="headerlink" href="#staging" title="Permalink to this headline">¶</a></h3>
 <p>In LMS, a DSL program is split into two stages: the first stage
 generates the second stage. The DSL program is partially evaluated
 during the first stage -- whether an expression belongs to the first
 or second stage is driven by types: expressions of type <tt class="docutils literal"><span class="pre">Rep[T]</span></tt> may
 be deferred to the second stage, while other expressions are evaluated
 during the first stage and become constants in the second stage.</p>
+<div class="side-by-side container">
+<div class="left container">
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">compute</span><span class="o">(</span><span class="n">b</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="c1">// the if is executed in the first stage</span>
@@ -92,6 +99,8 @@ during the first stage and become constants in the second stage.</p>
 <span class="cm">*******************************************/</span>
 </pre></div>
 </div>
+</div>
+<div class="right container">
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">def</span> <span class="n">compute</span><span class="o">(</span><span class="n">b</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Boolean</span><span class="o">])</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
     <span class="c1">// the if is deferred to the second stage</span>
@@ -119,6 +128,9 @@ during the first stage and become constants in the second stage.</p>
 <span class="cm">  End of Generated Code                  </span>
 <span class="cm">*******************************************/</span>
 </pre></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
