@@ -178,7 +178,7 @@ implemented at the DSL user level.</p>
 </div>
 <p>We can use this conditional loop unrolling to optimize multiplying a
 matrix known at staging time with a vector. For example, consider a
-matrix with one dense rows, and otherwise sparse rows:</p>
+matrix with a mix of dense and sparse rows:</p>
 <div class="highlight-scala"><div class="highlight"><pre><span class="n">A</span><span class="o">(</span><span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">),</span> <span class="c1">// dense</span>
   <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// null</span>
   <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// sparse</span>
