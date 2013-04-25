@@ -74,7 +74,7 @@ generates the second stage. The DSL program is partially evaluated
 during the first stage -- whether an expression belongs to the first
 or second stage is driven by types: expressions of type <tt class="docutils literal"><span class="pre">Rep[T]</span></tt> may
 be deferred to the second stage, while other expressions are evaluated
-during the first stage and become constants in the second stage.</p>
+during the first stage, becoming constants in the second stage.</p>
 <div class="side-by-side container">
 <div class="left container">
 <div class="highlight-scala"><div class="highlight"><pre><span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">x</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
@@ -131,6 +131,43 @@ during the first stage and become constants in the second stage.</p>
 </div>
 </div>
 </div>
+<p>Loops can be unrolled in the first stage, or be generated as loops in
+the second stage, driven by the type of their condition.</p>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="mi">3</span><span class="o">)</span><span class="k">:</span> <span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+  <span class="n">println</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<span class="k">val</span> <span class="n">x1</span> <span class="k">=</span> <span class="n">println</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x2</span> <span class="k">=</span> <span class="n">println</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x3</span> <span class="k">=</span> <span class="n">println</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="o">()</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">x</span><span class="o">)</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Range</span><span class="o">])</span> <span class="o">{</span>
+  <span class="n">println</span><span class="o">(</span><span class="n">i</span><span class="o">)</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<span class="k">var</span> <span class="n">x2</span> <span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">val</span> <span class="n">x5</span> <span class="k">=</span> <span class="k">while</span> <span class="o">(</span><span class="n">x2</span> <span class="o">&lt;</span> <span class="n">x0</span><span class="o">)</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x3</span> <span class="k">=</span> <span class="n">println</span><span class="o">(</span><span class="n">x2</span><span class="o">)</span>
+<span class="n">x3</span>
+<span class="n">x2</span> <span class="k">=</span> <span class="n">x2</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">}</span>
+<span class="n">x5</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>With this fine-grain control, conditional loop unrolling can be
+implemented at the DSL user level.</p>
 </div>
 </div>
 </div>
