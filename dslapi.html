@@ -192,7 +192,7 @@ dense row, and unroll the loop for the sparse rows.</p>
   <span class="k">val</span> <span class="n">n</span> <span class="k">=</span> <span class="n">a</span><span class="o">.</span><span class="n">length</span>
   <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="nc">NewArray</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="n">n</span><span class="o">)</span>
   <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="k">:</span> <span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
-    <span class="n">comment</span><span class="o">(</span><span class="s">&quot;index_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">comment</span><span class="o">(</span><span class="s">&quot;row_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
       <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="n">unrollIf</span><span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)(</span><span class="n">sparse</span><span class="o">(</span><span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">))))</span> <span class="o">{</span>
         <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">.</span><span class="n">at</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
       <span class="o">}</span>
@@ -205,7 +205,7 @@ dense row, and unroll the loop for the sparse rows.</p>
 <p>Let's compare the code generated for a dense vs sparse row.</p>
 <div class="side-by-side container">
 <div class="left container">
-<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code for row 0</span>
 <span class="k">var</span> <span class="n">x3</span> <span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="k">val</span> <span class="n">x12</span> <span class="k">=</span> <span class="k">while</span> <span class="o">(</span><span class="n">x3</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">)</span> <span class="o">{</span>
 <span class="k">val</span> <span class="n">x4</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
@@ -222,7 +222,7 @@ dense row, and unroll the loop for the sparse rows.</p>
 </div>
 </div>
 <div class="right container">
-<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code</span>
+<div class="highlight-scala"><div class="highlight"><pre><span class="c1">// generated code for row 2</span>
 <span class="k">val</span> <span class="n">x25</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
 <span class="k">val</span> <span class="n">x27</span> <span class="k">=</span> <span class="n">x1</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x25</span>
 <span class="k">val</span> <span class="n">x28</span> <span class="k">=</span> <span class="n">x25</span> <span class="o">+</span> <span class="n">x20</span>
