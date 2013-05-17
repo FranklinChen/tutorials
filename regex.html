@@ -1,0 +1,153 @@
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>From Interpreter to Compiler &mdash; LMS Tutorials</title>
+    
+    <link rel="stylesheet" href="_static/style.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygment_trac.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/main.js"></script>
+    <link rel="top" title="LMS Tutorials" href="index.html" />
+    <link rel="prev" title="DSL API" href="dslapi.html" /> 
+  </head>
+  <body>
+<div id="header_wrap" class="outer">
+   <a id="forkme_banner" href="https://github.com/scala-lms/tutorials">View on GitHub</a>
+    <header class="inner">
+         <a href="."><h1 id="project_title">Tutorials</h1></a>
+         <h2 id="project_tagline">Lightweight Modular Staging</h2>
+    </header>
+    </div>
+
+
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+                <div class="previous"><span class="divider">«</span> <a href="dslapi.html">DSL API</a> <span class="divider"></span></div>
+
+      <section id="main_content" class="inner">
+         
+  <div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
+<ul class="simple">
+<li><a class="reference internal" href="#from-interpreter-to-compiler" id="id1">From Interpreter to Compiler</a><ul>
+<li><a class="reference internal" href="#regular-expression-matcher" id="id2">Regular Expression Matcher</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="from-interpreter-to-compiler">
+<h1><a class="toc-backref" href="#id1">From Interpreter to Compiler</a><a class="headerlink" href="#from-interpreter-to-compiler" title="Permalink to this headline">¶</a></h1>
+<p>A staged interpreter is a compiler. This is useful, because an
+interpreter is usually much easier to implement than a compiler. In
+this section, we illustrate how to turn a vanilla interpreter into a
+compiler, using lightweight modular staging (LMS). The gist is to let
+LMS generate code for the interpreter specialized to a particular
+program -- the program is fixed at staging time, while the input(s) to
+the program may vary in the generated code. Hence, staging an
+interpreter should be as simple as wrapping the types of expressions
+that vary in <tt class="docutils literal"><span class="pre">Rep[_]</span></tt> while leaving the types of expressions we want
+specialized as is.</p>
+<p>As a case study, we stage a simple regular expression matcher. Our
+vanilla regular expression matcher is invoked on a regular expression
+string and an input string. The staged regular expression matcher is
+invoked on a regular expression constant string and a staged input
+string of type <tt class="docutils literal"><span class="pre">Rep[String]</span></tt>, and generates code specialized to match
+any input string against the constant regular expression pattern.</p>
+<p>We could further optimize the generated code by additional staged
+transformations, but here, we only illustrate the basic process of
+staging an interpreter. This process is widely applicable. For
+example, we used the same process to stage a bytecode interpreter into
+a bytecode compiler.</p>
+<div class="section" id="regular-expression-matcher">
+<h2><a class="toc-backref" href="#id2">Regular Expression Matcher</a><a class="headerlink" href="#regular-expression-matcher" title="Permalink to this headline">¶</a></h2>
+<p>We start with a small regular expression matcher, ported to Scala from
+<a class="reference external" href="http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html">a C version, written by Rob Pike and Brian Kernighan</a>.</p>
+<div class="highlight-scala"><pre>/* search for regexp anywhere in text */
+def matchsearch(regexp: String, text: String): Boolean = {
+  if (regexp(0) == '^')
+    matchhere(regexp, 1, text, 0)
+  else {
+    var start = 0
+    var found = matchhere(regexp, 0, text, start)
+    while (!found &amp;&amp; start&lt;text.length) {
+      start += 1
+      found = matchhere(regexp, 0, text, start)
+    }
+    found
+  }
+}
+
+/* search for restart of regexp at start of text */
+def matchhere(regexp: String, restart: Int, text: String, start: Int): Boolean = {
+  if (restart==regexp.length)
+    true
+  else if (regexp(restart)=='$' &amp;&amp; restart+1==regexp.length)
+    start==text.length
+  else if (restart+1&lt;regexp.length &amp;&amp; regexp(restart+1)=='*')
+    matchstar(regexp(restart), regexp, restart+2, text, start)
+  else if (start&lt;text.length &amp;&amp; matchchar(regexp(restart), text(start)))
+    matchhere(regexp, restart+1, text, start+1)
+  else false
+}
+
+/* search for c* followed by restart of regexp at start of text */
+def matchstar(c: Char, regexp: String, restart: Int, text: String, start: Int): Boolean = {
+  var sstart = start
+  var found = matchhere(regexp, restart, text, sstart)
+  var failed = false
+  while (!failed &amp;&amp; !found &amp;&amp; sstart&lt;text.length) {
+    failed = matchchar(c, text(sstart))
+    sstart += 1
+    found = matchhere(regexp, restart, text, sstart)
+  }
+  !failed &amp;&amp; found
+}
+
+def matchchar(c: Char, t: Char): Boolean = {
+  c == '.' || c == t
+}
+</pre>
+</div>
+</div>
+</div>
+
+
+      </section>
+    </div>
+
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+
+      </footer>
+    </div>
+
+  
+
+  </body>
+</html>
