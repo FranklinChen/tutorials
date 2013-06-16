@@ -1,0 +1,406 @@
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Shonan Challenge &mdash; LMS Tutorials</title>
+    
+    <link rel="stylesheet" href="_static/style.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/stylesheet.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygment_trac.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1-SNAPSHOT',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  false
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/main.js"></script>
+    <link rel="top" title="LMS Tutorials" href="index.html" />
+    <link rel="next" title="From Interpreter to Compiler" href="regex.html" />
+    <link rel="prev" title="Staging" href="staging.html" /> 
+  </head>
+  <body>
+<div id="header_wrap" class="outer">
+   <a id="forkme_banner" href="https://github.com/scala-lms/tutorials">View on GitHub</a>
+    <header class="inner">
+         <a href="."><h1 id="project_title">Tutorials</h1></a>
+         <a href="http://scala-lms.github.io"><h2 id="project_tagline">Lightweight Modular Staging</h2></a>
+    </header>
+    </div>
+
+
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+                <div class="previous"><span class="divider">«</span> <a href="staging.html">Staging</a> <span class="divider"></span></div>
+                <div class="next"><span class="divider"></span> <a href="regex.html">From Interpreter to Compiler</a> <span class="divider">»</span></div>
+
+      <section id="main_content" class="inner">
+         
+  <div class="section" id="shonan-challenge">
+<h1>Shonan Challenge<a class="headerlink" href="#shonan-challenge" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="step-0">
+<h2>Step 0<a class="headerlink" href="#step-0" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/*</span>
+<span class="cm">STEP 0: starting point</span>
+
+<span class="cm">  this is our static implementation for the HMM shonan challenge problem.</span>
+
+<span class="cm">  for further reference, see:</span>
+
+<span class="cm">    - Shonan Challenge for Generative Programming</span>
+<span class="cm">      Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM&#39;13</span>
+<span class="cm">      https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf</span>
+
+<span class="cm">    - https://github.com/StagedHPC/shonan-challenge</span>
+<span class="cm">*/</span>
+</pre></div>
+</div>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">A</span> <span class="k">=</span> <span class="n">scala</span><span class="o">.</span><span class="nc">Array</span>
+
+<span class="k">val</span> <span class="n">a</span> <span class="k">=</span>
+  <span class="n">A</span><span class="o">(</span><span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">),</span> <span class="c1">// dense</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// null</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// sparse</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">v</span> <span class="k">=</span> <span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">)</span>
+
+<span class="k">def</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]],</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">val</span> <span class="n">n</span> <span class="k">=</span> <span class="n">a</span><span class="o">.</span><span class="n">length</span>
+  <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="n">n</span><span class="o">)</span>
+
+  <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">))</span> <span class="o">{</span>
+    <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">))</span> <span class="o">{</span>
+      <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">)(</span><span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+  <span class="n">v1</span>
+<span class="o">}</span>
+
+<span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">result</span> <span class="k">=</span> <span class="n">v1</span><span class="o">.</span><span class="n">mkString</span><span class="o">(</span><span class="s">&quot;,&quot;</span><span class="o">)</span>
+<span class="n">check</span><span class="o">(</span><span class="s">&quot;shonan-hmm1a&quot;</span><span class="o">,</span> <span class="n">result</span><span class="o">)</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="mi">5</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">0</span><span class="o">,</span><span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="step-0-5">
+<h2>Step 0.5<a class="headerlink" href="#step-0-5" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/* STEP 0.5: static vs dynamic conditional</span>
+
+<span class="cm">  now we&#39;re adding some basic codgen facilities and play</span>
+<span class="cm">  with static vs dynamic expressions. fully static expressions</span>
+<span class="cm">  do not show up in generated code. if we change the </span>
+<span class="cm">  condition to depend on the (dynamic) input array, an if/else</span>
+<span class="cm">  statement will be generated.</span>
+<span class="cm">*/</span>
+</pre></div>
+</div>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">snippet</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">DslDriver</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span>,<span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+
+    <span class="k">val</span> <span class="n">x</span> <span class="k">=</span> <span class="mi">100</span> <span class="o">-</span> <span class="mi">5</span> <span class="c1">//* v0.length</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">println</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
+    <span class="o">}</span>
+
+    <span class="n">v</span>
+ 
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/*****************************************</span>
+<span class="cm">  Emitting Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+<span class="k">class</span> <span class="nc">Snippet</span> <span class="k">extends</span> <span class="o">((</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])=&gt;(</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]))</span> <span class="o">{</span>
+<span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x0</span><span class="k">:</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x1</span> <span class="k">=</span> <span class="n">println</span><span class="o">(</span><span class="s">&quot;hello&quot;</span><span class="o">)</span>
+<span class="n">x0</span>
+<span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*****************************************</span>
+<span class="cm">  End of Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="step-1">
+<h2>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/* STEP 1: staging the matrix vector prod</span>
+
+<span class="cm">  we want to change the mv prod function to take a dynamic vector</span>
+<span class="cm">  and a static matrix. we move it into the DslDriver trait so</span>
+<span class="cm">  it can use Rep.</span>
+
+<span class="cm">  we generate nested loops by default (Rep[Range]). to make that</span>
+<span class="cm">  work, we need to lift the static matrix to a Rep value. we</span>
+<span class="cm">  do that using staticData.</span>
+
+<span class="cm">  now we can play with the loops shapes: Range loops are computed</span>
+<span class="cm">  statically, i.e. unrolled at staging time. Rep[Range] loops cause</span>
+<span class="cm">  generation of loop code. </span>
+
+<span class="cm">  we can make unrolling decisions in a very fine-grained manner:</span>
+<span class="cm">  for dense rows we want to generate a loop, for sparse rows</span>
+<span class="cm">  we want to unroll. we just add a condition `sparse` and </span>
+<span class="cm">  either do a Range or Rep[Range] loop.</span>
+<span class="cm">*/</span>
+</pre></div>
+</div>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">A</span> <span class="k">=</span> <span class="n">scala</span><span class="o">.</span><span class="nc">Array</span>
+
+<span class="k">val</span> <span class="n">a</span> <span class="k">=</span>
+  <span class="n">A</span><span class="o">(</span><span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">),</span> <span class="c1">// dense</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// null</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// sparse</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">v</span> <span class="k">=</span> <span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">)</span>
+
+
+<span class="k">val</span> <span class="n">snippet</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">DslDriver</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span>,<span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+
+    <span class="k">def</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a0</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]],</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="k">val</span> <span class="n">n</span> <span class="k">=</span> <span class="n">a0</span><span class="o">.</span><span class="n">length</span>
+
+      <span class="k">val</span> <span class="n">a</span> <span class="k">=</span> <span class="n">staticData</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+
+      <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="nc">NewArray</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="n">n</span><span class="o">)</span>
+
+      <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)</span><span class="k">:</span><span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">val</span> <span class="n">sparse</span> <span class="k">=</span> <span class="n">a0</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">count</span><span class="o">(</span><span class="k">_</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">&lt;</span> <span class="mi">3</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">sparse</span><span class="o">)</span> <span class="o">{</span>
+          <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)</span><span class="k">:</span><span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">apply</span><span class="o">(</span><span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+          <span class="o">}</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>                  
+          <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)</span><span class="k">:</span><span class="kt">Rep</span><span class="o">[</span><span class="kt">Range</span><span class="o">])</span> <span class="o">{</span>
+            <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">apply</span><span class="o">(</span><span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+          <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="n">v1</span>
+    <span class="o">}</span>
+
+    <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span>
+    <span class="n">v1</span>
+
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/*****************************************</span>
+<span class="cm">  Emitting Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+<span class="k">class</span> <span class="nc">Snippet</span><span class="o">(</span><span class="n">px6</span><span class="k">:</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">extends</span> <span class="o">((</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])=&gt;(</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]))</span> <span class="o">{</span>
+<span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x0</span><span class="k">:</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x2</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="mi">5</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x6</span> <span class="k">=</span> <span class="n">px6</span> <span class="c1">// static data: Array(1,1,1,1,1)</span>
+<span class="k">var</span> <span class="n">x4</span> <span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">val</span> <span class="n">x13</span> <span class="k">=</span> <span class="k">while</span> <span class="o">(</span><span class="n">x4</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">)</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x5</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x7</span> <span class="k">=</span> <span class="n">x6</span><span class="o">(</span><span class="n">x4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x8</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="n">x4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x9</span> <span class="k">=</span> <span class="n">x7</span> <span class="o">*</span> <span class="n">x8</span>
+<span class="k">val</span> <span class="n">x10</span> <span class="k">=</span> <span class="n">x5</span> <span class="o">+</span> <span class="n">x9</span>
+<span class="k">val</span> <span class="n">x11</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="n">x10</span>
+<span class="n">x4</span> <span class="k">=</span> <span class="n">x4</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">x14</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x17</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">=</span> <span class="n">x14</span>
+<span class="k">val</span> <span class="n">x22</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x24</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x22</span>
+<span class="k">val</span> <span class="n">x19</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x25</span> <span class="k">=</span> <span class="n">x22</span> <span class="o">+</span> <span class="n">x19</span>
+<span class="k">val</span> <span class="n">x26</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x25</span>
+<span class="k">val</span> <span class="n">x27</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x29</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span> <span class="k">=</span> <span class="n">x27</span>
+<span class="k">val</span> <span class="n">x30</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x32</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x30</span>
+<span class="k">val</span> <span class="n">x33</span> <span class="k">=</span> <span class="n">x30</span> <span class="o">+</span> <span class="n">x19</span>
+<span class="k">val</span> <span class="n">x34</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x33</span>
+<span class="k">val</span> <span class="n">x21</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x35</span> <span class="k">=</span> <span class="n">x33</span> <span class="o">+</span> <span class="n">x21</span>
+<span class="k">val</span> <span class="n">x36</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x35</span>
+<span class="n">x2</span>
+<span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*****************************************</span>
+<span class="cm">  End of Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="step-2">
+<h2>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/* STEP 2: unroll if</span>
+
+<span class="cm">  the code duplication of the loop body above is not very nice.</span>
+<span class="cm">  fortunately, we can create arbitrary staging-time abstractions.</span>
+<span class="cm">  we create an auxiliary method unrollIf that captures the</span>
+<span class="cm">  conditional unrolling pattern in a general way.</span>
+<span class="cm">  the mv prod function no longer needs to express the loop</span>
+<span class="cm">  body twice.</span>
+
+<span class="cm">  the generated code is identical. &quot;abstraction without regret&quot; ftw!</span>
+<span class="cm">*/</span>
+</pre></div>
+</div>
+<div class="side-by-side container">
+<div class="left container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="k">val</span> <span class="n">A</span> <span class="k">=</span> <span class="n">scala</span><span class="o">.</span><span class="nc">Array</span>
+
+<span class="k">val</span> <span class="n">a</span> <span class="k">=</span>
+  <span class="n">A</span><span class="o">(</span><span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">),</span> <span class="c1">// dense</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// null</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span> <span class="c1">// sparse</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">),</span>
+    <span class="n">A</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+
+<span class="k">val</span> <span class="n">v</span> <span class="k">=</span> <span class="n">A</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">,</span><span class="mi">1</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">snippet</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">DslDriver</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span>,<span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]]</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">snippet</span><span class="o">(</span><span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+
+    <span class="k">def</span> <span class="n">unrollIf</span><span class="o">(</span><span class="n">c</span><span class="k">:</span><span class="kt">Boolean</span><span class="o">,</span><span class="n">r</span><span class="k">:</span> <span class="kt">Range</span><span class="o">)</span> <span class="k">=</span> <span class="k">new</span> <span class="o">{</span> <span class="k">def</span> <span class="n">foreach</span><span class="o">(</span><span class="n">f</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=&gt;</span> <span class="nc">Rep</span><span class="o">[</span><span class="kt">Unit</span><span class="o">])</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">c</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="n">start</span> <span class="n">until</span> <span class="n">r</span><span class="o">.</span><span class="n">end</span><span class="o">)</span><span class="k">:</span><span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+          <span class="n">f</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+        <span class="o">}</span>
+      <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>                  
+        <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="n">start</span> <span class="n">until</span> <span class="n">r</span><span class="o">.</span><span class="n">end</span><span class="o">)</span><span class="k">:</span><span class="kt">Rep</span><span class="o">[</span><span class="kt">Range</span><span class="o">])</span> <span class="o">{</span>
+          <span class="n">f</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}}</span>
+
+
+    <span class="k">def</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a0</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]],</span> <span class="n">v</span><span class="k">:</span> <span class="kt">Rep</span><span class="o">[</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]])</span> <span class="k">=</span> <span class="o">{</span>
+      <span class="k">val</span> <span class="n">n</span> <span class="k">=</span> <span class="n">a0</span><span class="o">.</span><span class="n">length</span>
+
+      <span class="k">val</span> <span class="n">a</span> <span class="k">=</span> <span class="n">staticData</span><span class="o">(</span><span class="n">a0</span><span class="o">)</span>
+
+      <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="nc">NewArray</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="n">n</span><span class="o">)</span>
+
+      <span class="k">for</span> <span class="o">(</span><span class="n">i</span> <span class="k">&lt;-</span> <span class="o">(</span><span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">)</span><span class="k">:</span><span class="kt">Range</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">val</span> <span class="n">sparse</span> <span class="k">=</span> <span class="n">a0</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">count</span><span class="o">(</span><span class="k">_</span> <span class="o">!=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">&lt;</span> <span class="mi">3</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">j</span> <span class="k">&lt;-</span> <span class="n">unrollIf</span><span class="o">(</span><span class="n">sparse</span><span class="o">,</span> <span class="mi">0</span> <span class="n">until</span> <span class="n">n</span><span class="o">))</span> <span class="o">{</span>
+          <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="k">=</span> <span class="n">v1</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">+</span> <span class="n">a</span><span class="o">(</span><span class="n">i</span><span class="o">).</span><span class="n">apply</span><span class="o">(</span><span class="n">j</span><span class="o">)</span> <span class="o">*</span> <span class="n">v</span><span class="o">(</span><span class="n">j</span><span class="o">)</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="n">v1</span>
+    <span class="o">}</span>
+
+    <span class="k">val</span> <span class="n">v1</span> <span class="k">=</span> <span class="n">matrix_vector_prod</span><span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">v</span><span class="o">)</span>
+    <span class="n">v1</span>
+
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="right container">
+<div class="highlight-scala"><div class="highlight"><pre><span class="cm">/*****************************************</span>
+<span class="cm">  Emitting Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+<span class="k">class</span> <span class="nc">Snippet</span><span class="o">(</span><span class="n">px6</span><span class="k">:</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span> <span class="k">extends</span> <span class="o">((</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])=&gt;(</span><span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]))</span> <span class="o">{</span>
+<span class="k">def</span> <span class="n">apply</span><span class="o">(</span><span class="n">x0</span><span class="k">:</span><span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">])</span><span class="k">:</span> <span class="kt">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x2</span> <span class="k">=</span> <span class="k">new</span> <span class="nc">Array</span><span class="o">[</span><span class="kt">Int</span><span class="o">](</span><span class="mi">5</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x6</span> <span class="k">=</span> <span class="n">px6</span> <span class="c1">// static data: Array(1,1,1,1,1)</span>
+<span class="k">var</span> <span class="n">x4</span> <span class="k">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">val</span> <span class="n">x13</span> <span class="k">=</span> <span class="k">while</span> <span class="o">(</span><span class="n">x4</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="o">)</span> <span class="o">{</span>
+<span class="k">val</span> <span class="n">x5</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x7</span> <span class="k">=</span> <span class="n">x6</span><span class="o">(</span><span class="n">x4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x8</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="n">x4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x9</span> <span class="k">=</span> <span class="n">x7</span> <span class="o">*</span> <span class="n">x8</span>
+<span class="k">val</span> <span class="n">x10</span> <span class="k">=</span> <span class="n">x5</span> <span class="o">+</span> <span class="n">x9</span>
+<span class="k">val</span> <span class="n">x11</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">0</span><span class="o">)</span> <span class="k">=</span> <span class="n">x10</span>
+<span class="n">x4</span> <span class="k">=</span> <span class="n">x4</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="o">}</span>
+<span class="k">val</span> <span class="n">x14</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x17</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span> <span class="k">=</span> <span class="n">x14</span>
+<span class="k">val</span> <span class="n">x22</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x24</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x22</span>
+<span class="k">val</span> <span class="n">x19</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x25</span> <span class="k">=</span> <span class="n">x22</span> <span class="o">+</span> <span class="n">x19</span>
+<span class="k">val</span> <span class="n">x26</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">2</span><span class="o">)</span> <span class="k">=</span> <span class="n">x25</span>
+<span class="k">val</span> <span class="n">x27</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x29</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">3</span><span class="o">)</span> <span class="k">=</span> <span class="n">x27</span>
+<span class="k">val</span> <span class="n">x30</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x32</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x30</span>
+<span class="k">val</span> <span class="n">x33</span> <span class="k">=</span> <span class="n">x30</span> <span class="o">+</span> <span class="n">x19</span>
+<span class="k">val</span> <span class="n">x34</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x33</span>
+<span class="k">val</span> <span class="n">x21</span> <span class="k">=</span> <span class="n">x0</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">x35</span> <span class="k">=</span> <span class="n">x33</span> <span class="o">+</span> <span class="n">x21</span>
+<span class="k">val</span> <span class="n">x36</span> <span class="k">=</span> <span class="n">x2</span><span class="o">(</span><span class="mi">4</span><span class="o">)</span> <span class="k">=</span> <span class="n">x35</span>
+<span class="n">x2</span>
+<span class="o">}</span>
+<span class="o">}</span>
+<span class="cm">/*****************************************</span>
+<span class="cm">  End of Generated Code                  </span>
+<span class="cm">*******************************************/</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+      </section>
+    </div>
+
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+
+      </footer>
+    </div>
+
+  
+
+  </body>
+</html>
